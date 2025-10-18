@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - BrainrotBR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --gh-color: radial-gradient(circle, #4a004a, #000000);
+            --text-color: #fff;
+            --accent: #4a004a;
+            --accent-color: #c300ff;
+            --accent-2: #b200ff;
+            --accent-3: #6b00ff;
+            --primary-color: #00c3ff;
+            --card-color: #0000006c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+
+        body {
+            background: var(--gh-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .checkout-card {
+            background: var(--card-color);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+        }
+
+        .checkout-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .checkout-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .checkout-items {
+            margin-bottom: 30px;
+        }
+
+        .checkout-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .checkout-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-color);
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(195, 0, 255, 0.2);
+        }
+
+        .payment-section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .qr-code {
+            max-width: 250px;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .pix-code {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: monospace;
+            word-break: break-all;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .terms {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .terms label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .terms input {
+            margin-top: 3px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent-2), var(--accent-3));
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert-success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            color: #2ecc71;
+        }
+
+        .alert-error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="checkout-card">
+            <div class="checkout-header">
+                <h1>Checkout</h1>
+                <p>Complete suas informações para finalizar a compra</p>
+            </div>
+
+            <div id="alertContainer"></div>
+
+            <div class="checkout-items" id="checkoutItems">
+                <!-- Itens serão preenchidos por JavaScript -->
+            </div>
+
+            <div class="checkout-total">
+                <span>Total:</span>
+                <span id="checkoutTotal">R$ 0,00</span>
+            </div>
+
+            <form id="checkoutForm">
+                <div class="form-group">
+                    <label for="name">Nome Completo *</label>
+                    <input type="text" id="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail *</label>
+                    <input type="email" id="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nick">Nick do Roblox *</label>
+                    <input type="text" id="nick" required placeholder="Seu nick no Roblox">
+                </div>
+
+                <div class="payment-section">
+                    <h3>Pagamento via PIX</h3>
+                    <div class="qr-code">
+                        <img src="https://cdn.discordapp.com/attachments/1417922244553998431/1424064894059417781/Screenshot_20251004-1204262.png?ex=68f117c8&is=68efc648&hm=d8e575be7c0ccab2565796a13bc265f20f556d174e35c8f5d07dd6365105b27f&" alt="QR Code PIX">
+                    </div>
+                    <p>Escaneie o QR Code acima ou use o código abaixo</p>
+                    <div class="pix-code" id="pixCode">
+                        maycondouglas1893@gmail.com
+                    </div>
+                    <button type="button" class="btn-ghost" onclick="copyPixCode()" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-copy"></i> Copiar Código PIX
+                    </button>
+                </div>
+
+                <div class="terms">
+                    <label>
+                        <input type="checkbox" id="terms" required>
+                        <span>Eu li e concordo com os termos e condições de serviço</span>
+                    </label>
+                </div>
+
+                <button type="button" class="btn-primary" id="nextBtn" disabled>
+                    Seguinte
+                </button>
+            </form>
+
+            <button class="back-btn" onclick="window.location.href='index.html'">
+                Voltar para a Loja
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Recuperar dados do carrinho
+        const cart = JSON.parse(sessionStorage.getItem('checkoutCart')) || [];
+        const total = parseFloat(sessionStorage.getItem('checkoutTotal')) || 0;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderCheckoutItems();
+            setupFormValidation();
+        });
+
+        function renderCheckoutItems() {
+            const container = document.getElementById('checkoutItems');
+            const totalElement = document.getElementById('checkoutTotal');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center;padding:20px;">Seu carrinho está vazio.</p>';
+                totalElement.textContent = 'R$ 0,00';
+                return;
+            }
+
+            container.innerHTML = '';
+            let calculatedTotal = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.preco * item.quantidade;
+                calculatedTotal += itemTotal;
+
+                const itemElement = document.createElement('div');
+                itemElement.className = 'checkout-item';
+                itemElement.innerHTML = `
+                    <div>
+                        <strong>${item.nome}</strong>
+                        <div style="font-size:14px;color:#aaa;">Quantidade: ${item.quantidade}</div>
+                    </div>
+                    <div>R$ ${itemTotal.toFixed(2)}</div>
+                `;
+                container.appendChild(itemElement);
+            });
+
+            totalElement.textContent = `R$ ${calculatedTotal.toFixed(2)}`;
+        }
+
+        function setupFormValidation() {
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const nickInput = document.getElementById('nick');
+            const termsCheckbox = document.getElementById('terms');
+            const nextBtn = document.getElementById('nextBtn');
+
+            function validateForm() {
+                const isFormValid = nameInput.value.trim() !== '' &&
+                                  emailInput.value.trim() !== '' &&
+                                  nickInput.value.trim() !== '' &&
+                                  termsCheckbox.checked;
+
+                nextBtn.disabled = !isFormValid;
+            }
+
+            nameInput.addEventListener('input', validateForm);
+            emailInput.addEventListener('input', validateForm);
+            nickInput.addEventListener('input', validateForm);
+            termsCheckbox.addEventListener('change', validateForm);
+
+            nextBtn.addEventListener('click', proceedToChat);
+        }
+
+        function copyPixCode() {
+            const pixCode = document.getElementById('pixCode').textContent;
+            navigator.clipboard.writeText(pixCode).then(() => {
+                showAlert('Código PIX copiado!', 'success');
+            }).catch(() => {
+                showAlert('Erro ao copiar código.', 'error');
+            });
+        }
+
+        function proceedToChat() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const nick = document.getElementById('nick').value.trim();
+
+            // Criar chat ID único
+            const chatId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+            // Salvar dados do pedido
+            const orderData = {
+                chatId: chatId,
+                customer: { name, email, nick },
+                items: cart,
+                total: total,
+                timestamp: new Date().toISOString()
+            };
+
+            // Salvar no localStorage para o chat
+            localStorage.setItem('currentOrder', JSON.stringify(orderData));
+            localStorage.setItem('currentChatId', chatId);
+
+            // Redirecionar para o chat do cliente
+            window.location.href = `client-chat.html?chatId=${chatId}`;
+        }
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alert.style.display = 'block';
+
+            container.appendChild(alert);
+
+            setTimeout(() => {
+                alert.remove();
+            }, 5000);
+        }
+
+        // Verificar se há dados no carrinho
+        if (cart.length === 0) {
+            showAlert('Seu carrinho está vazio. Redirecionando para a loja...', 'error');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

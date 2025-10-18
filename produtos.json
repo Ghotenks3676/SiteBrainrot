@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "nome": "Los Combinasionas",
+    "preco_original": 72.35,
+    "preco": 49.9,
+    "desconto": 45,
+    "tag": "ESGOTADO",
+    "imagem": "https://tse1.mm.bing.net/th/id/OIP.Bsvn5nA451RkQaBH8M2RfgHaD5?rs=1&pid=ImgDetMain&o=7&rm=3"
+  },
+  {
+    "id": 2,
+    "nome": "Garama and Madundung 400M/S",
+    "preco_original": 1449.86,
+    "preco": 999.9,
+    "desconto": 45,
+    "tag": "Resultou",
+    "imagem": "https://tse1.mm.bing.net/th/id/OIP.Bsvn5nA451RkQaBH8M2RfgHaD5?rs=1&pid=ImgDetMain&o=7&rm=3"
+  },
+  {
+    "id": 3,
+    "nome": "Los Bros",
+    "preco_original": 0,
+    "preco": 26.9,
+    "desconto": 45,
+    "tag": "Secreto",
+    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931132514599043/BROOOOOOOO.png?ex=68d42fc5&is=68d2de45&hm=35a7d2620bdde1f73f5cae3579d85345f594bc9294e1136d8162992beec21d34&"
+  },
+  {
+    "id": 4,
+    "nome": "Los hotspositos",
+    "preco_original": 0,
+    "preco": 40,
+    "desconto": 45,
+    "tag": "LIMITADO",
+    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931132980428942/Loshotspotsitos.png?ex=68d42fc5&is=68d2de45&hm=bc6e77f78a045013afa7c3feea541dab61dac96018d7aaf34f5dc698692c3028&"
+  },
+  {
+    "id": 5,
+    "nome": "Los traleritos",
+    "preco_original": 0,
+    "preco": 6.5,
+    "desconto": 45,
+    "tag": "LIMITADO",
+    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931133542203502/Los_Tralaleritos.png?ex=68d42fc6&is=68d2de46&hm=be31f63e3baa138d4953f537846c84dd5deba4b5133e0666acc261f8202013b6&"
+  },
+  {
+    "id": 6,
+    "nome": "Chicleteira bicicleteira",
+    "preco_original": 0,
+    "preco": 18.9,
+    "desconto": 45,
+    "tag": "LIMITADO",
+    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931134037393500/Chicleteira.png?ex=68d42fc6&is=68d2de46&hm=d5d338666acb2cc3ce9271aa1f445f6b161e6c7426bd150f8a26ac189b5e5028&"
+  },
+  {
+    "id": 7,
+    "nome": "Secretos aleatório 1M-5M",
+    "preco_original": 0,
+    "preco": 8.9,
+    "desconto": 45,
+    "tag": "OFERTA",
+    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931134637183056/Graipuss.png?ex=68d42fc6&is=68d2de46&hm=e10f6f58d195270d2abdab66fab43ae4b4ad9ef2b7cb989b7c276925baa46185&"
+  },
+  {
+    "id": 8,
+    "nome": "teste",
+    "preco": 5775,
+    "preco_original": null,
+    "estoque": 999,
+    "imagem": "",
+    "tag": ""
+  }
+]

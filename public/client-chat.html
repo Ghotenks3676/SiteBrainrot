@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat de Suporte - BrainrotBR</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --gh-color: radial-gradient(circle, #4a004a, #000000);
+            --text-color: #fff;
+            --accent: #4a004a;
+            --accent-color: #c300ff;
+            --accent-2: #b200ff;
+            --accent-3: #6b00ff;
+            --primary-color: #00c3ff;
+            --card-color: #0000006c;
+        }
+
+        body {
+            background: var(--gh-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 200px);
+        }
+
+        .order-info {
+            flex: 0 0 300px;
+            background: var(--card-color);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--card-color);
+            border-radius: 15px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .message.client {
+            align-self: flex-end;
+            background: linear-gradient(90deg, var(--accent-2), var(--accent-3));
+            color: white;
+        }
+
+        .message.admin {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .message.system {
+            align-self: center;
+            background: rgba(255, 165, 0, 0.2);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            color: #ffa500;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-color);
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .send-btn {
+            background: linear-gradient(90deg, var(--accent-2), var(--accent-3));
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .file-btn {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .file-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .order-items {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-btn {
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .media-message {
+            max-width: 300px;
+            margin: 5px 0;
+        }
+
+        .media-message img, .media-message video {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status-pending {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+
+        .status-paid {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Suporte BrainrotBR</h1>
+            <p>Chat de atendimento ao cliente</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="order-info">
+                <h3>📦 Seu Pedido</h3>
+                <div id="orderDetails">
+                    <!-- Detalhes do pedido serão preenchidos aqui -->
+                </div>
+                <div class="order-items" id="orderItems">
+                    <!-- Itens do pedido serão preenchidos aqui -->
+                </div>
+                <div class="order-total">
+                    <strong>Total: <span id="orderTotal">R$ 0,00</span></strong>
+                </div>
+                <div class="payment-status">
+                    <strong>Status: <span id="paymentStatus" class="status-badge status-pending">Pendente</span></strong>
+                </div>
+                <button class="back-btn" onclick="window.location.href='index.html'">
+                    Voltar para a Loja
+                </button>
+            </div>
+
+            <div class="chat-area">
+                <div class="messages" id="messages">
+                    <div class="message system">
+                        Bem-vindo ao suporte BrainrotBR! Aguarde enquanto um de nossos atendentes responde sua mensagem.
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <input type="file" id="fileInput" class="file-input" accept="image/*,video/*">
+                    <button class="file-btn" onclick="document.getElementById('fileInput').click()">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <textarea class="message-input" id="messageInput" placeholder="Digite sua mensagem..." rows="1"></textarea>
+                    <button class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentChatId = null;
+        let messages = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obter chatId da URL
+            const urlParams = new URLSearchParams(window.location.search);
+            currentChatId = urlParams.get('chatId');
+
+            if (!currentChatId) {
+                // Tentar obter do localStorage
+                currentChatId = localStorage.getItem('currentChatId');
+                if (!currentChatId) {
+                    alert('Chat não encontrado. Redirecionando para a loja...');
+                    window.location.href = 'index.html';
+                    return;
+                }
+            }
+
+            loadOrderInfo();
+            loadMessages();
+            setupEventListeners();
+        });
+
+        function loadOrderInfo() {
+            const orderData = JSON.parse(localStorage.getItem('currentOrder') || '{}');
+            
+            if (orderData.customer) {
+                document.getElementById('orderDetails').innerHTML = `
+                    <div><strong>Cliente:</strong> ${orderData.customer.name}</div>
+                    <div><strong>Email:</strong> ${orderData.customer.email}</div>
+                    <div><strong>Nick Roblox:</strong> ${orderData.customer.nick}</div>
+                `;
+            }
+
+            if (orderData.items) {
+                const itemsContainer = document.getElementById('orderItems');
+                itemsContainer.innerHTML = '';
+                
+                orderData.items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'order-item';
+                    itemElement.innerHTML = `
+                        <span>${item.nome} x${item.quantidade}</span>
+                        <span>R$ ${(item.preco * item.quantidade).toFixed(2)}</span>
+                    `;
+                    itemsContainer.appendChild(itemElement);
+                });
+            }
+
+            if (orderData.total) {
+                document.getElementById('orderTotal').textContent = `R$ ${orderData.total.toFixed(2)}`;
+            }
+        }
+
+        function loadMessages() {
+            // Carregar mensagens do localStorage
+            const savedMessages = localStorage.getItem(`chat_${currentChatId}`);
+            if (savedMessages) {
+                messages = JSON.parse(savedMessages);
+                renderMessages();
+            } else {
+                // Mensagem inicial do sistema
+                addSystemMessage('Pedido recebido! Aguarde a confirmação do pagamento.');
+            }
+        }
+
+        function setupEventListeners() {
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const fileInput = document.getElementById('fileInput');
+
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            sendBtn.addEventListener('click', sendMessage);
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    sendMediaMessage(e.target.files[0]);
+                }
+            });
+
+            // Auto-ajustar altura do textarea
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const text = messageInput.value.trim();
+
+            if (!text) return;
+
+            const message = {
+                id: Date.now(),
+                text: text,
+                sender: 'client',
+                timestamp: new Date().toISOString(),
+                type: 'text'
+            };
+
+            addMessage(message);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Simular resposta do admin após 2-5 segundos
+            setTimeout(() => {
+                const responses = [
+                    "Obrigado pela sua mensagem! Estou verificando seu pedido.",
+                    "Pagamento confirmado! Seu pedido está sendo processado.",
+                    "Em até 24 horas você receberá o produto em sua conta.",
+                    "Precisa de mais alguma informação?",
+                    "Seu nick no Roblox foi confirmado com sucesso."
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                const adminMessage = {
+                    id: Date.now(),
+                    text: randomResponse,
+                    sender: 'admin',
+                    timestamp: new Date().toISOString(),
+                    type: 'text'
+                };
+
+                addMessage(adminMessage);
+            }, 2000 + Math.random() * 3000);
+        }
+
+        function sendMediaMessage(file) {
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const message = {
+                    id: Date.now(),
+                    mediaUrl: e.target.result,
+                    sender: 'client',
+                    timestamp: new Date().toISOString(),
+                    type: file.type.startsWith('image/') ? 'image' : 'video',
+                    fileName: file.name
+                };
+
+                addMessage(message);
+            };
+            reader.readAsDataURL(file);
+
+            // Limpar input de arquivo
+            document.getElementById('fileInput').value = '';
+        }
+
+        function addMessage(message) {
+            messages.push(message);
+            saveMessages();
+            renderMessages();
+
+            // Scroll para baixo
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const message = {
+                id: Date.now(),
+                text: text,
+                sender: 'system',
+                timestamp: new Date().toISOString(),
+                type: 'system'
+            };
+            addMessage(message);
+        }
+
+        function renderMessages() {
+            const container = document.getElementById('messages');
+            container.innerHTML = '';
+
+            messages.forEach(message => {
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${message.sender}`;
+
+                if (message.type === 'text' || message.type === 'system') {
+                    messageElement.innerHTML = `
+                        <div>${message.text}</div>
+                        <div class="message-time">${formatTime(message.timestamp)}</div>
+                    `;
+                } else if (message.type === 'image' || message.type === 'video') {
+                    messageElement.innerHTML = `
+                        <div class="media-message">
+                            ${message.type === 'image' ? 
+                                `<img src="${message.mediaUrl}" alt="${message.fileName}">` :
+                                `<video controls><source src="${message.mediaUrl}" type="video/mp4"></video>`
+                            }
+                        </div>
+                        <div class="message-time">${formatTime(message.timestamp)}</div>
+                    `;
+                }
+
+                container.appendChild(messageElement);
+            });
+        }
+
+        function saveMessages() {
+            localStorage.setItem(`chat_${currentChatId}`, JSON.stringify(messages));
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        // Simular atualização de status de pagamento após 10 segundos
+        setTimeout(() => {
+            document.getElementById('paymentStatus').textContent = 'Pago';
+            document.getElementById('paymentStatus').className = 'status-badge status-paid';
+            addSystemMessage('✅ Pagamento confirmado! Seu pedido está sendo processado.');
+        }, 10000);
+    </script>
+</body>
+</html>
