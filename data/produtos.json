@@ -6,7 +6,7 @@
     "preco": 26.9,
     "desconto": 45,
     "tag": "Secreto",
-    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931132514599043/BROOOOOOOO.png?ex=68f130c5&is=68efdf45&hm=46b681e066c87fabddbd543882e4da884825a963c71000266ce466f8895865f2&"
+    "imagem": "../img/BRO.png"
   },
   {
     "id": 4,
@@ -15,7 +15,7 @@
     "preco": 40,
     "desconto": 45,
     "tag": "LIMITADO",
-    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931132980428942/Loshotspotsitos.png?ex=68f130c5&is=68efdf45&hm=0208080ad10551cfc549c7358fa26ba954115242dc1f7d965a642423df71c124&"
+    "imagem": "../img/Loshotspotsitos.png"
   },
   {
     "id": 5,
@@ -24,7 +24,7 @@
     "preco": 6.5,
     "desconto": 45,
     "tag": "LIMITADO",
-    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931133542203502/Los_Tralaleritos.png?ex=68f130c6&is=68efdf46&hm=3ac509cc9fd080452718aabb83b8c30ac7105e89d7d6f5ab53140a6868221112&"
+    "imagem": "../img/Los_Tralaleritos.png"
   },
   {
     "id": 6,
@@ -33,7 +33,7 @@
     "preco": 18.9,
     "desconto": 45,
     "tag": "LIMITADO",
-    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931134037393500/Chicleteira.png?ex=68f130c6&is=68efdf46&hm=e5f16ca491cfe6023b14e5785e5e7cb69aa77cab62715c575227824016cec2c9&"
+    "imagem": "../img/Chicleteira.png"
   },
   {
     "id": 7,
@@ -42,7 +42,7 @@
     "preco": 8.9,
     "desconto": 45,
     "tag": "OFERTA",
-    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931134637183056/Graipuss.png?ex=68f130c6&is=68efdf46&hm=9cb6b812631f2bed5dd6d9f5b2dd9811e4771ea979d6017fb298d5104cd77353&"
+    "imagem": "../img/Graipuss.png"
   },
     {
     "id": 8,
@@ -51,6 +51,6 @@
     "preco": 65.00,
     "desconto": 45,
     "tag": "OFERTA",
-    "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931773903634543/traced-1000040824.png?ex=68f1315e&is=68efdfde&hm=dd3f9810f262524538424541caa72974c32f52e378901159a442f00b76bdacff&"
+    "imagem": "../img/secret_random.png"
   }
 ]

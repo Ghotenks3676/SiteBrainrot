@@ -7,10 +7,128 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* NOVO: Estilo da notificação de compra */
+        .purchase-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 320px;
+            background: var(--card-color);
+            border-radius: 12px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            transform: translateX(-400px);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .purchase-notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-header {
+            background: linear-gradient(90deg, var(--accent-2), var(--accent-3));
+            color: white;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .notification-icon {
+            font-size: 18px;
+        }
+
+        .notification-content {
+            padding: 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .notification-product-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .notification-product-info {
+            flex: 1;
+        }
+
+        .notification-product-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .notification-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        /* NOVO: Estilo da barra de rolagem no topo */
+        .ticker-bar {
+            position: relative;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(90deg, var(--accent-2), var(--accent-3));
+            color: white;
+            padding: 8px 0;
+            z-index: 2000;
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .ticker-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 25s linear infinite;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Ajuste no body para compensar a altura da ticker bar */
+        body {
+            margin-top: 40px; /* Aproximadamente a altura da ticker bar + padding */
+        }
+
         /* Tema */
         :root {
             --bg-color: #000000;
-            --gh-color: radial-gradient(circle, #4a004a, #000000);
+            --gh-color: radial-gradient(circle, #16004a, #021d24);
             --text-color: #fff;
             --accent: #4a004a;
             --accent-color: #c300ff;
@@ -29,8 +147,8 @@
         }
 
         body.light-theme {
-            --bg-color: #f5f5f5;
-            --gh-color: radial-gradient(circle, #ffffff, #4a004a);
+            --bg-color: #0d10c4;
+            --gh-color: radial-gradient(circle,#ffffff, #0004ff);
             --text-color: #000000ce;
             --accent: #9c749cad;
             --accent-color: #c300ff;
@@ -66,7 +184,7 @@
 
         header {
             padding: 15px 0;
-            background-color: var(--card-color);
+            background-color: var(--cad-color);
             width: 100%;
             position: sticky;
             top: 0;
@@ -281,6 +399,7 @@
             width: 35px;
             height: 35px;
             cursor: pointer;
+            z-index: 1001;
         }
 
         /* Painéis */
@@ -291,7 +410,7 @@
             padding: 25px;
             background-color: var(--card-color);
             position: fixed;
-            top: 80px;
+            top: 120px; /* Ajustado para considerar a ticker bar e header */
             right: 20px;
             width: 350px;
             max-height: 80vh;
@@ -697,15 +816,15 @@
         
         .grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
-            gap: 18px; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Reduzido de 240px para 200px */
+            gap: 15px; /* Reduzido de 18px para 15px */
             background: var(--cad-color)
         }
 
         .card {
             background: var(--gh-color);
             border: 1px solid var(--glass-border); 
-            padding: 12px; 
+            padding: 10px; /* Reduzido de 12px para 10px */
             border-radius: 12px; 
             overflow: hidden;
             display: flex; 
@@ -722,7 +841,7 @@
         }
 
         .card .media { 
-            height: 150px; 
+            height: 140px; /* Reduzido de 150px para 140px */
             border-radius: 8px; 
             display: flex; 
             align-items: center; 
@@ -746,7 +865,7 @@
         
         .card h3 { 
             margin: 6px 0 2px; 
-            font-size: 16px; 
+            font-size: 15px; /* Reduzido de 16px para 15px */
             color: var(--text); 
         }
         
@@ -762,13 +881,13 @@
         .price { 
             font-weight: 800; 
             color: var(--success-color); 
-            font-size: 18px; 
+            font-size: 16px; /* Reduzido de 18px para 16px */
         }
         
         .old-price { 
             text-decoration: line-through; 
             color: #766d76; 
-            font-size: 13px; 
+            font-size: 12px; /* Reduzido de 13px para 12px */
             margin-right: 6px; 
         }
 
@@ -781,7 +900,7 @@
         
         .btn-buy { 
             flex: 1; 
-            padding: 10px; 
+            padding: 8px; /* Reduzido de 10px para 8px */
             border-radius: 10px; 
             background: linear-gradient(90deg, var(--accent), var(--accent-2)); 
             border: none; 
@@ -789,6 +908,7 @@
             cursor: pointer; 
             font-weight: 700; 
             transition: opacity 0.3s;
+            font-size: 14px; /* Adicionado para melhor legibilidade */
         }
         
         .btn-buy:hover {
@@ -799,10 +919,11 @@
             background: transparent; 
             border: 1px solid var(--glass-border); 
             color: var(--muted); 
-            padding: 8px 10px; 
+            padding: 6px 8px; /* Reduzido de 8px 10px para 6px 8px */
             border-radius: 8px; 
             cursor: pointer; 
             transition: all 0.3s;
+            font-size: 14px; /* Adicionado para melhor legibilidade */
         }
 
         .btn-ghost:hover {
@@ -818,7 +939,7 @@
             align-items: center; 
             justify-content: center; 
             z-index: 2000; 
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(7, 3, 243, 0.8);
         }
         
         .modal.open { 
@@ -1033,7 +1154,7 @@
         /* Message notification */
         .message {
             position: fixed;
-            top: 20px;
+            top: 60px; /* Ajustado para considerar a ticker bar */
             right: 20px;
             padding: 15px 20px;
             border-radius: 8px;
@@ -1149,67 +1270,6 @@
         .pagbank-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .head {
-                flex-wrap: wrap;
-            }
-            
-            nav ul {
-                display: none;
-            }
-            
-            nav ul.active {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                margin-top: 15px;
-            }
-            
-            .search-bar {
-                order: 3;
-                width: 100%;
-                margin-top: 15px;
-                flex: 0 0 100%;
-            }
-            
-            .men {
-                display: block;
-            }
-            
-            .admin-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .footer-col {
-                flex: 1 1 100%;
-            }
-            
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .Gh {
-                text-align: center;
-                margin-top: 10px;
-            }
-
-            .logo-text {
-                font-size: 40px;
-            }
-
-            .description {
-                font-size: 16px;
-                padding: 15px;
-            }
-
-            .checkout-container {
-                margin: 20px;
-                padding: 15px;
-            }
         }
 
         /* Tabela de vendas no admin */
@@ -1333,9 +1393,364 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 195, 255, 0.4);
         }
+
+        /* ============== RESPONSIVIDADE ============== */
+        @media (max-width: 1200px) {
+            .grid { 
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+            }
+            
+            .card .media { 
+                height: 130px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .grid { 
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            }
+            
+            .card .media { 
+                height: 120px;
+            }
+            
+            .logo-text {
+                font-size: 50px;
+            }
+            
+            .description {
+                font-size: 16px;
+            }
+            
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .head {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--card-color);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                padding: 15px 0;
+                margin: 0;
+                z-index: 999;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            }
+            
+            nav ul.active {
+                display: flex;
+            }
+            
+            nav ul li {
+                padding: 12px 20px;
+                border-bottom: 1px solid var(--glass-border);
+            }
+            
+            nav ul li:last-child {
+                border-bottom: none;
+            }
+            
+            .search-bar {
+                order: 3;
+                width: 100%;
+                margin-top: 15px;
+                flex: 0 0 100%;
+            }
+            
+            .men {
+                display: block;
+            }
+            
+            .icon-group {
+                gap: 10px;
+            }
+            
+            .admin-btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .theme-toggle {
+                font-size: 18px;
+            }
+            
+            .switch {
+                width: 45px;
+                height: 22px;
+            }
+            
+            .slider:before {
+                height: 16px;
+                width: 16px;
+            }
+            
+            input:checked + .slider:before {
+                transform: translateX(23px);
+            }
+            
+            .grid { 
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+                gap: 12px;
+            }
+            
+            .card {
+                padding: 8px;
+            }
+            
+            .card .media { 
+                height: 110px;
+            }
+            
+            .card h3 { 
+                font-size: 14px;
+            }
+            
+            .price { 
+                font-size: 15px;
+            }
+            
+            .old-price { 
+                font-size: 11px;
+            }
+            
+            .btn-buy, .btn-ghost {
+                font-size: 13px;
+                padding: 7px;
+            }
+            
+            .logo-text {
+                font-size: 40px;
+            }
+            
+            .description {
+                font-size: 15px;
+                padding: 15px;
+            }
+            
+            .hero {
+                padding: 60px 20px;
+            }
+            
+            .status-btn {
+                font-size: 16px;
+                padding: 10px 18px;
+            }
+            
+            .footer-col {
+                flex: 1 1 100%;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .Gh {
+                text-align: center;
+                margin-top: 10px;
+            }
+
+            .checkout-container {
+                margin: 20px;
+                padding: 15px;
+            }
+            
+            /* Ajustes para mobile com ticker bar */
+            body {
+                margin-top: 35px;
+            }
+            
+            header {
+                top: 35px;
+            }
+            
+            .painel {
+                top: 100px;
+                width: 90%;
+                right: 5%;
+                left: 5%;
+            }
+            
+            .message {
+                top: 55px;
+                right: 10px;
+                left: 10px;
+            }
+            
+            /* Ajustes para notificação em mobile */
+            .purchase-notification {
+                width: calc(100% - 40px);
+                left: 20px;
+                bottom: 80px;
+            }
+            
+            .social-icons {
+                right: 10px;
+                bottom: 80px;
+            }
+            
+            .social-icons a {
+                padding: 10px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .grid { 
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
+                gap: 10px;
+            }
+            
+            .card .media { 
+                height: 100px;
+            }
+            
+            .card h3 { 
+                font-size: 13px;
+            }
+            
+            .price { 
+                font-size: 14px;
+            }
+            
+            .old-price { 
+                font-size: 10px;
+            }
+            
+            .btn-buy, .btn-ghost {
+                font-size: 12px;
+                padding: 6px;
+            }
+            
+            .logo-text {
+                font-size: 35px;
+            }
+            
+            .description {
+                font-size: 14px;
+                padding: 12px;
+            }
+            
+            .hero {
+                padding: 40px 15px;
+            }
+            
+            .status-btn {
+                font-size: 15px;
+                padding: 9px 16px;
+            }
+            
+            .info-section {
+                padding: 20px 15px;
+                margin: 10px 15px;
+            }
+            
+            .info-section h2 {
+                font-size: 1.2rem;
+            }
+            
+            .info-section p {
+                font-size: 14px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+            
+            .head {
+                padding: 0 15px;
+            }
+            
+            .purchase-notification {
+                width: calc(100% - 30px);
+                left: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid { 
+                grid-template-columns: repeat(2, 1fr); 
+            }
+            
+            .card .media { 
+                height: 90px;
+            }
+            
+            .logo-text {
+                font-size: 30px;
+            }
+            
+            .head {
+                gap: 5px;
+            }
+            
+            .icon-group {
+                gap: 8px;
+            }
+            
+            .admin-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .theme-toggle {
+                font-size: 16px;
+            }
+            
+            .switch {
+                width: 40px;
+                height: 20px;
+            }
+            
+            .slider:before {
+                height: 14px;
+                width: 14px;
+            }
+            
+            input:checked + .slider:before {
+                transform: translateX(20px);
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- NOTIFICAÇÃO DE COMPRA -->
+    <div id="purchase-notification" class="purchase-notification">
+        <button class="notification-close" onclick="hidePurchaseNotification()">✖</button>
+        <div class="notification-header">
+            <span class="notification-icon">🛒</span>
+            <span class="notification-title">Alguém acabou de comprar</span>
+        </div>
+        <div class="notification-content">
+            <img id="notification-product-image" class="notification-product-image" src="" alt="Produto">
+            <div class="notification-product-info">
+                <div id="notification-product-name" class="notification-product-name">Nome do Produto</div>
+                <div class="notification-time">Agora mesmo!</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE ROLAGEM NO TOPO -->
+    <div class="ticker-bar">
+        <div class="ticker-content">
+            • Suporte Rápido e Eficiente! ⚡🛠️     •     🌟 Produtos 100% Originais e Garantidos! 🌟 • Compra Segura, Prática e Transparente! 🔒✨     •     Os Melhores Preços do Mercado! 💲🛒     •     🔥 Promoção Exclusiva: até 90% OFF em Tudo! 🔥 &nbsp;&nbsp;&nbsp;
+            • Suporte Rápido e Eficiente! ⚡🛠️     •     🌟 Produtos 100% Originais e Garantidos! 🌟 • Compra Segura, Prática e Transparente! 🔒✨     •     Os Melhores Preços do Mercado! 💲🛒     •     🔥 Promoção Exclusiva: até 90% OFF em Tudo! 🔥 &nbsp;&nbsp;&nbsp;
+            • Suporte Rápido e Eficiente! ⚡🛠️     •     🌟 Produtos 100% Originais e Garantidos! 🌟 • Compra Segura, Prática e Transparente! 🔒✨     •     Os Melhores Preços do Mercado! 💲🛒     •     🔥 Promoção Exclusiva: até 90% OFF em Tudo! 🔥 &nbsp;&nbsp;&nbsp;
+            • Suporte Rápido e Eficiente! ⚡🛠️     •     🌟 Produtos 100% Originais e Garantidos! 🌟 • Compra Segura, Prática e Transparente! 🔒✨     •     Os Melhores Preços do Mercado! 💲🛒     •     🔥 Promoção Exclusiva: até 90% OFF em Tudo! 🔥 &nbsp;&nbsp;&nbsp;
+        </div>
+    </div>
+
     <header>
         <section class="head">
             <div class="log">
@@ -1644,6 +2059,46 @@
     </footer>
 
     <script>
+        // ============== SISTEMA DE NOTIFICAÇÃO DE COMPRA ==============
+        let purchaseNotificationTimer;
+        
+        function showRandomPurchaseNotification() {
+            if (produtos.length === 0) return;
+            
+            // Escolhe um produto aleatório
+            const randomIndex = Math.floor(Math.random() * produtos.length);
+            const randomProduct = produtos[randomIndex];
+            
+            // Atualiza o conteúdo da notificação
+            document.getElementById('notification-product-name').textContent = randomProduct.nome;
+            document.getElementById('notification-product-image').src = randomProduct.imagem || 'https://via.placeholder.com/50';
+            
+            // Mostra a notificação
+            const notification = document.getElementById('purchase-notification');
+            notification.classList.add('show');
+            
+            // Esconde automaticamente após 5 segundos
+            setTimeout(() => {
+                hidePurchaseNotification();
+            }, 5000);
+        }
+        
+        function hidePurchaseNotification() {
+            const notification = document.getElementById('purchase-notification');
+            notification.classList.remove('show');
+        }
+        
+        function schedulePurchaseNotification() {
+            // Gera um intervalo aleatório entre 5 e 10 segundos
+            const randomInterval = Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000;
+            
+            // Agenda a próxima notificação
+            purchaseNotificationTimer = setTimeout(() => {
+                showRandomPurchaseNotification();
+                schedulePurchaseNotification(); // Agenda a próxima
+            }, randomInterval);
+        }
+        
         // ============== CONFIGURAÇÃO FIREBASE ==============
         const firebaseConfig = {
             // SUA CONFIGURAÇÃO DO FIREBASE AQUI
@@ -1695,11 +2150,19 @@
         // ============== Menu Hamburguer ==============
         const menuBtn = document.getElementById("hamburger");
         const navMenu = document.getElementById("nav-menu");
-        const searchBar = document.querySelector('.search-bar');
 
         menuBtn.addEventListener("click", () => {
             navMenu.classList.toggle("active");
-            searchBar.classList.toggle("active");
+            // Fecha painéis abertos quando o menu hamburguer é clicado
+            fecharPainelConta();
+            fecharCarrinho();
+        });
+
+        // Fechar menu ao clicar em um item
+        document.querySelectorAll('#nav-menu li').forEach(item => {
+            item.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
         });
 
         // ============== Sistema de Autenticação ==============
@@ -1766,6 +2229,9 @@
                 }
                 produtos = await response.json();
                 renderizarProdutos();
+                
+                // Inicia as notificações de compra após carregar os produtos
+                schedulePurchaseNotification();
             } catch (error) {
                 console.error('Erro ao carregar produtos:', error);
                 showMessage('Erro ao carregar produtos. Carregando dados locais...', 'error');
@@ -1776,65 +2242,35 @@
                     if (produtosLocais) {
                         produtos = JSON.parse(produtosLocais);
                         renderizarProdutos();
+                        
+                        // Inicia as notificações de compra após carregar os produtos
+                        schedulePurchaseNotification();
                     } else {
                         // Dados de exemplo caso não haja produtos no localStorage
-                        produtos = [                         
-                           {
-                            "id": 3,
-                            "nome": "Los Bros",
-                            "preco_original": 0,
-                            "preco": 26.9,
-                            "desconto": 45,
-                            "tag": "Secreto",
-                            "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931132514599043/BROOOOOOOO.png?ex=68f47c85&is=68f32b05&hm=f514b8afe9355d699538c109be76ec25c6f5939ad60b9848756012d3a539840f&"
-                          },
-                          {
-                            "id": 4,
-                            "nome": "Los hotspositos",
-                            "preco_original": 0,
-                            "preco": 40,
-                            "desconto": 45,
-                            "tag": "LIMITADO",
-                            "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931132980428942/Loshotspotsitos.png?ex=68f47c85&is=68f32b05&hm=3490360f3345595fec06c481490d45495ac4e59f40391edc7a55c90d9a5b669a&"
-                          },
-                          {
-                            "id": 5,
-                            "nome": "Los traleritos",
-                            "preco_original": 0,
-                            "preco": 6.5,
-                            "desconto": 45,
-                            "tag": "LIMITADO",
-                            "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931133542203502/Los_Tralaleritos.png?ex=68f47c86&is=68f32b06&hm=3accb23a0ccbd3a50d5b1ec20bce5a7ac3007e2df17e5afc35b35b7303675207&"
-                          },
-                          {
-                            "id": 6,
-                            "nome": "Chicleteira bicicleteira",
-                            "preco_original": 0,
-                            "preco": 18.9,
-                            "desconto": 45,
-                            "tag": "LIMITADO",
-                            "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931134037393500/Chicleteira.png?ex=68f47c86&is=68f32b06&hm=ba4f6fef25c82482a9fd4964e4d618490263373258d663a5c430b0d1201554e3&"
-                          },
-                          {
-                            "id": 7,
-                            "nome": "Secretos aleatório 1M-5M/s",
-                            "preco_original": 0,
-                            "preco": 8.9,
-                            "desconto": 45,
-                            "tag": "OFERTA",
-                            "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931134637183056/Graipuss.png?ex=68f47c86&is=68f32b06&hm=bf714c046fb2cc6e6dcde6e81907707db83a7b1a897eb6749e7a923e083317f9&"
-                          },
+                        produtos = [
                             {
-                            "id": 8,
-                            "nome": "Secretos aleatório 60M-120M/s",
-                            "preco_original": 0,
-                            "preco": 65.00,
-                            "desconto": 45,
-                            "tag": "OFERTA",
-                            "imagem": "https://cdn.discordapp.com/attachments/1417922244553998431/1417931773903634543/traced-1000040824.png?ex=68f47d1e&is=68f32b9e&hm=69b502441f72e1ab1e7766208effe997f80eb75fe14387eba671075500352ab7&"
-                          }
-                         ];
+                                id: 1,
+                                nome: "Produto Exemplo 1",
+                                preco: 29.99,
+                                preco_original: 39.99,
+                                imagem: "https://via.placeholder.com/150",
+                                estoque: 10,
+                                tag: "Novo"
+                            },
+                            {
+                                id: 2,
+                                nome: "Produto Exemplo 2",
+                                preco: 49.99,
+                                preco_original: 59.99,
+                                imagem: "https://via.placeholder.com/150",
+                                estoque: 5,
+                                tag: "Oferta"
+                            }
+                        ];
                         renderizarProdutos();
+                        
+                        // Inicia as notificações de compra após carregar os produtos
+                        schedulePurchaseNotification();
                     }
                 } catch (e) {
                     console.error('Erro ao carregar produtos locais:', e);
@@ -2310,10 +2746,17 @@
         document.addEventListener('click', (e) => {
             const painelConta = document.getElementById('painel-conta');
             const painelCarrinho = document.getElementById('painel-carrinho');
+            const navMenu = document.getElementById('nav-menu');
             
+            // Fechar painéis se clicar fora deles
             if (!e.target.closest('.icon-btn') && !e.target.closest('.painel')) {
                 if (painelConta.style.display === 'flex') fecharPainelConta();
                 if (painelCarrinho.style.display === 'flex') fecharCarrinho();
+            }
+            
+            // Fechar menu hamburguer se clicar fora dele
+            if (!e.target.closest('#nav-menu') && !e.target.closest('#hamburger')) {
+                navMenu.classList.remove('active');
             }
         });
 
@@ -2504,24 +2947,60 @@
 
         function loadDefaultJSON() {
             const defaultProducts = [
-                {
-                    id: 1,
-                    nome: "Produto Exemplo 1",
-                    preco: 29.99,
-                    preco_original: 39.99,
-                    imagem: "https://via.placeholder.com/150",
-                    estoque: 10,
-                    tag: "Novo"
-                },
-                {
-                    id: 2,
-                    nome: "Produto Exemplo 2",
-                    preco: 49.99,
-                    preco_original: 59.99,
-                    imagem: "https://via.placeholder.com/150",
-                    estoque: 5,
-                    tag: "Oferta"
-                }
+ {
+    "id": 3,
+    "nome": "Los Bros",
+    "preco_original": 0,
+    "preco": 26.9,
+    "desconto": 45,
+    "tag": "Secreto",
+    "imagem": "../img/BRO.png"
+  },
+  {
+    "id": 4,
+    "nome": "Los hotspositos",
+    "preco_original": 0,
+    "preco": 40,
+    "desconto": 45,
+    "tag": "LIMITADO",
+    "imagem": "../img/Loshotspotsitos.png"
+  },
+  {
+    "id": 5,
+    "nome": "Los traleritos",
+    "preco_original": 0,
+    "preco": 6.5,
+    "desconto": 45,
+    "tag": "LIMITADO",
+    "imagem": "../img/Los_Tralaleritos.png"
+  },
+  {
+    "id": 6,
+    "nome": "Chicleteira bicicleteira",
+    "preco_original": 0,
+    "preco": 18.9,
+    "desconto": 45,
+    "tag": "LIMITADO",
+    "imagem": "../img/Chicleteira.png"
+  },
+  {
+    "id": 7,
+    "nome": "Secretos aleatório 1M-5M/s",
+    "preco_original": 0,
+    "preco": 8.9,
+    "desconto": 45,
+    "tag": "OFERTA",
+    "imagem": "../img/Graipuss.png"
+  },
+    {
+    "id": 8,
+    "nome": "Secretos aleatório 60M-120M/s",
+    "preco_original": 0,
+    "preco": 65.00,
+    "desconto": 45,
+    "tag": "OFERTA",
+    "imagem": "../img/secret_random.png"
+  }
             ];
             
             document.getElementById('productsJSON').value = JSON.stringify(defaultProducts, null, 2);
@@ -2529,6 +3008,4 @@
         }
     </script>
 </body>
-
 </html>
-
