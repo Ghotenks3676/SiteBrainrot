@@ -191,19 +191,19 @@ function handleRating(chatId, data) {
 
 // Rotas básicas
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 app.get('/admin-chat.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin-chat.html'));
+    res.sendFile(path.join(__dirname, 'public/admin-chat.html'));
 });
 
 app.get('/client-chat.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'client-chat.html'));
+    res.sendFile(path.join(__dirname, 'public/client-chat.html'));
 });
 
 app.get('/checkout.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'checkout.html'));
+    res.sendFile(path.join(__dirname, 'public/checkout.html'));
 });
 
 // API para produtos
@@ -260,4 +260,5 @@ server.listen(PORT, () => {
         fs.mkdirSync(dataDir, { recursive: true });
         console.log(`📁 Diretório de dados criado: ${dataDir}`);
     }
+
 });
