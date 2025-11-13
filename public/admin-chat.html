@@ -16,6 +16,9 @@
             --accent-3: #6b00ff;
             --primary-color: #00c3ff;
             --card-color: #0000006c;
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
         }
 
         body {
@@ -108,6 +111,7 @@
             transition: all 0.3s;
             border: 1px solid rgba(255, 255, 255, 0.1);
             background: rgba(0, 0, 0, 0.2);
+            position: relative;
         }
 
         .chat-item:hover {
@@ -380,11 +384,6 @@
             color: #2ecc71;
         }
 
-        .status-active {
-            background: rgba(52, 152, 219, 0.2);
-            color: #3498db;
-        }
-
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -395,6 +394,95 @@
             font-size: 3rem;
             margin-bottom: 15px;
             opacity: 0.5;
+        }
+
+        .command-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .command-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .command-btn:hover {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .unread-badge {
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        /* Notificações suaves */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-color);
+            border: 1px solid var(--accent-color);
+            color: var(--text-color);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-color: var(--success-color);
+            background: rgba(46, 204, 113, 0.1);
+        }
+
+        .notification.error {
+            border-color: var(--danger-color);
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .notification.warning {
+            border-color: var(--warning-color);
+            background: rgba(243, 156, 18, 0.1);
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-icon {
+            font-size: 20px;
+        }
+
+        .notification-message {
+            flex: 1;
         }
     </style>
 </head>
@@ -408,11 +496,21 @@
         <div class="admin-container">
             <div class="chats-list">
                 <div class="chats-header">
-                    <h2>Chats Ativos</h2>
+                    <h2>Chats Ativos <span id="totalChats">(0)</span></h2>
                     <button class="refresh-btn" onclick="loadChats()">
                         <i class="fas fa-sync-alt"></i> Atualizar
                     </button>
                 </div>
+                
+                <div class="command-buttons">
+                    <button class="command-btn" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double"></i> Marcar tudo como lido
+                    </button>
+                    <button class="command-btn" onclick="exportAllChats()">
+                        <i class="fas fa-download"></i> Exportar chats
+                    </button>
+                </div>
+                
                 <div class="chats-container" id="chatsContainer">
                     <div class="empty-state">
                         <i class="fas fa-comments"></i>
@@ -438,6 +536,18 @@
                             <div>Status: <span id="paymentStatusAdmin" class="status-badge status-pending">Pendente</span></div>
                         </div>
                     </div>
+                    
+                    <div class="command-buttons">
+                        <button class="command-btn" onclick="confirmPayment()">
+                            <i class="fas fa-check-circle"></i> /pago
+                        </button>
+                        <button class="command-btn" onclick="sendTemplateMessage('Olá! Aguarde enquanto verifico seu pagamento.')">
+                            <i class="fas fa-comment"></i> Msg Rápida 1
+                        </button>
+                        <button class="command-btn" onclick="sendTemplateMessage('Pagamento confirmado! Seu produto será entregue em até 24h.')">
+                            <i class="fas fa-comment"></i> Msg Rápida 2
+                        </button>
+                    </div>
                 </div>
 
                 <div class="messages" id="messagesAdmin">
@@ -453,7 +563,7 @@
                     <button class="file-btn" onclick="document.getElementById('fileInputAdmin').click()">
                         <i class="fas fa-paperclip"></i>
                     </button>
-                    <textarea class="message-input" id="messageInputAdmin" placeholder="Digite sua mensagem..." rows="1"></textarea>
+                    <textarea class="message-input" id="messageInputAdmin" placeholder="Digite sua mensagem... (use /pago para confirmar pagamento)" rows="1"></textarea>
                     <button class="send-btn" id="sendBtnAdmin">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -466,31 +576,81 @@
         let currentChatId = null;
         let chats = [];
         let ws = null;
+        let unreadMessages = {};
+        let messagePollingInterval = null;
+
+        // Sistema de notificações suaves
+        function showNotification(message, type = 'info', duration = 4000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">
+                        ${type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'}
+                    </div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Mostrar notificação
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            // Esconder após o tempo
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        // Inicializar sistema
+        function initializeChatSystem() {
+            if (!localStorage.getItem('allOrders')) {
+                localStorage.setItem('allOrders', '[]');
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
+            initializeChatSystem();
             loadChats();
             setupEventListeners();
             connectWebSocket();
+            startMessagePolling();
         });
 
         function connectWebSocket() {
             try {
                 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                const wsUrl = `${protocol}//${window.location.host}`;
+                const wsUrl = `${protocol}//${window.location.host}?userType=admin`;
                 
                 ws = new WebSocket(wsUrl);
                 
                 ws.onopen = () => {
                     console.log('✅ Conectado ao WebSocket como admin');
+                    showNotification('Conectado ao servidor em tempo real', 'success', 2000);
                 };
                 
                 ws.onmessage = (event) => {
                     try {
                         const data = JSON.parse(event.data);
-                        if (data.type === 'new_message' && currentChatId === data.chatId) {
-                            // Adicionar nova mensagem ao chat atual
-                            addMessageToUI(data.message);
+                        console.log('📨 Mensagem WebSocket recebida:', data.type);
+                        
+                        if (data.type === 'new_message') {
+                            handleNewMessage(data);
                         }
+                        
+                        if (data.type === 'payment_updated') {
+                            updatePaymentStatus(data.status);
+                            showNotification('Status de pagamento atualizado', 'success');
+                        }
+                        
                     } catch (error) {
                         console.error('❌ Erro ao processar mensagem WebSocket:', error);
                     }
@@ -498,58 +658,170 @@
                 
                 ws.onclose = () => {
                     console.log('🔌 Conexão WebSocket fechada');
+                    showNotification('Conexão perdida. Reconectando...', 'warning', 3000);
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('❌ Erro WebSocket:', error);
+                    showNotification('Erro na conexão', 'error', 3000);
                 };
                 
             } catch (error) {
                 console.error('❌ Erro ao conectar WebSocket:', error);
+                showNotification('Erro ao conectar com o servidor', 'error');
+            }
+        }
+
+        function handleNewMessage(data) {
+            // Salvar mensagem no localStorage
+            const messages = JSON.parse(localStorage.getItem(`chat_${data.chatId}`) || '[]');
+            messages.push(data.message);
+            localStorage.setItem(`chat_${data.chatId}`, JSON.stringify(messages));
+            
+            // Atualizar pedido com última mensagem
+            updateOrderLastMessage(data.chatId, data.message);
+            
+            // Se é do chat atual, adicionar à UI
+            if (currentChatId === data.chatId) {
+                addMessageToUI(data.message);
+                markChatAsRead(data.chatId);
+            } else {
+                // Marcar como não lido
+                addUnreadMessage(data.chatId, data.message);
+                showNotification(`Nova mensagem de ${getCustomerName(data.chatId)}`, 'info');
+            }
+            
+            // Recarregar lista de chats
+            loadChats();
+        }
+
+        function getCustomerName(chatId) {
+            const chat = chats.find(c => c.id === chatId);
+            return chat ? chat.customer.name : 'Cliente';
+        }
+
+        function updateOrderLastMessage(chatId, message) {
+            try {
+                const allOrders = JSON.parse(localStorage.getItem('allOrders') || '[]');
+                const orderIndex = allOrders.findIndex(order => order.chatId === chatId);
+                
+                if (orderIndex !== -1) {
+                    allOrders[orderIndex].lastMessage = message.text;
+                    allOrders[orderIndex].lastMessageTime = message.timestamp;
+                    allOrders[orderIndex].unread = (allOrders[orderIndex].unread || 0) + 1;
+                    localStorage.setItem('allOrders', JSON.stringify(allOrders));
+                }
+            } catch (error) {
+                console.error('❌ Erro ao atualizar última mensagem:', error);
+            }
+        }
+
+        // Polling para garantir atualização mesmo sem WebSocket
+        function startMessagePolling() {
+            messagePollingInterval = setInterval(() => {
+                if (currentChatId) {
+                    checkForNewMessages(currentChatId);
+                }
+            }, 2000); // Verificar a cada 2 segundos
+        }
+
+        function checkForNewMessages(chatId) {
+            const messages = JSON.parse(localStorage.getItem(`chat_${chatId}`) || '[]');
+            const currentMessageCount = document.querySelectorAll('#messagesAdmin .message').length;
+            
+            if (messages.length > currentMessageCount) {
+                renderMessages(messages);
+            }
+        }
+
+        function addUnreadMessage(chatId, message) {
+            if (!unreadMessages[chatId]) {
+                unreadMessages[chatId] = 0;
+            }
+            unreadMessages[chatId]++;
+            updateChatBadge(chatId);
+        }
+
+        function markChatAsRead(chatId) {
+            // Atualizar no array allOrders
+            const allOrders = JSON.parse(localStorage.getItem('allOrders') || '[]');
+            const orderIndex = allOrders.findIndex(order => order.chatId === chatId);
+            if (orderIndex !== -1) {
+                allOrders[orderIndex].unread = 0;
+                localStorage.setItem('allOrders', JSON.stringify(allOrders));
+            }
+            
+            // Também atualizar no objeto unreadMessages
+            unreadMessages[chatId] = 0;
+            updateChatBadge(chatId);
+        }
+
+        function markAllAsRead() {
+            const allOrders = JSON.parse(localStorage.getItem('allOrders') || '[]');
+            allOrders.forEach(order => {
+                order.unread = 0;
+            });
+            localStorage.setItem('allOrders', JSON.stringify(allOrders));
+            
+            unreadMessages = {};
+            loadChats();
+            showNotification('Todos os chats marcados como lidos', 'success');
+        }
+
+        function updateChatBadge(chatId) {
+            const chatElement = document.querySelector(`[data-chat-id="${chatId}"]`);
+            if (chatElement) {
+                let badge = chatElement.querySelector('.unread-badge');
+                const unreadCount = unreadMessages[chatId] || 0;
+                
+                if (unreadCount > 0) {
+                    if (!badge) {
+                        badge = document.createElement('div');
+                        badge.className = 'unread-badge';
+                        chatElement.appendChild(badge);
+                    }
+                    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                } else if (badge) {
+                    badge.remove();
+                }
             }
         }
 
         async function loadChats() {
             try {
-                // Buscar chats do localStorage (simulação)
+                const allOrders = JSON.parse(localStorage.getItem('allOrders') || '[]');
                 const allChats = [];
-                const keys = Object.keys(localStorage);
-                
-                for (const key of keys) {
-                    if (key.startsWith('chat_')) {
-                        try {
-                            const chatData = JSON.parse(localStorage.getItem(key));
-                            if (chatData && chatData.length > 0) {
-                                const chatId = key.replace('chat_', '');
-                                const orderData = JSON.parse(localStorage.getItem('currentOrder') || '{}');
-                                
-                                if (orderData.chatId === chatId) {
-                                    allChats.push({
-                                        id: chatId,
-                                        customer: orderData.customer,
-                                        items: orderData.items,
-                                        total: orderData.total,
-                                        messages: chatData,
-                                        lastMessage: chatData[chatData.length - 1]?.text || 'Nenhuma mensagem',
-                                        lastMessageTime: chatData[chatData.length - 1]?.timestamp || new Date().toISOString()
-                                    });
-                                }
-                            }
-                        } catch (e) {
-                            console.warn(`Chat ${key} corrompido:`, e);
+
+                for (const order of allOrders) {
+                    try {
+                        const messages = JSON.parse(localStorage.getItem(`chat_${order.chatId}`) || '[]');
+                        
+                        if (order.customer) {
+                            const lastMessage = messages[messages.length - 1];
+                            allChats.push({
+                                id: order.chatId,
+                                customer: order.customer,
+                                items: order.items || [],
+                                total: order.total || 0,
+                                paymentStatus: order.paymentStatus || 'pending',
+                                messages: messages,
+                                lastMessage: lastMessage?.text || order.lastMessage || 'Nenhuma mensagem',
+                                lastMessageTime: lastMessage?.timestamp || order.lastMessageTime,
+                                unread: order.unread || 0
+                            });
                         }
+                    } catch (e) {
+                        console.warn(`Chat ${order.chatId} corrompido:`, e);
                     }
                 }
                 
                 chats = allChats;
                 renderChatsList();
+                document.getElementById('totalChats').textContent = `(${chats.length})`;
+                
             } catch (error) {
                 console.error('❌ Erro ao carregar chats:', error);
-                document.getElementById('chatsContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Erro ao carregar chats</p>
-                        <button class="refresh-btn" onclick="loadChats()" style="margin-top: 10px;">
-                            <i class="fas fa-sync-alt"></i> Tentar Novamente
-                        </button>
-                    </div>
-                `;
             }
         }
 
@@ -567,7 +839,6 @@
                 return;
             }
 
-            // Ordenar chats por data (mais recentes primeiro)
             chats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
             
             container.innerHTML = '';
@@ -575,15 +846,20 @@
             chats.forEach(chat => {
                 const chatElement = document.createElement('div');
                 chatElement.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
+                chatElement.setAttribute('data-chat-id', chat.id);
                 chatElement.onclick = () => openChat(chat.id);
                 
                 const messagePreview = chat.lastMessage.length > 50 ? 
                     chat.lastMessage.substring(0, 50) + '...' : 
                     chat.lastMessage;
                 
+                const paymentBadge = chat.paymentStatus === 'paid' ? 
+                    '<span class="status-badge status-paid" style="margin-left: 5px;">Pago</span>' : 
+                    '<span class="status-badge status-pending" style="margin-left: 5px;">Pendente</span>';
+                
                 chatElement.innerHTML = `
                     <div class="chat-item-header">
-                        <div class="chat-customer">${chat.customer.name}</div>
+                        <div class="chat-customer">${chat.customer.name} ${paymentBadge}</div>
                         <div class="chat-time">${formatTime(chat.lastMessageTime)}</div>
                     </div>
                     <div class="chat-preview">${messagePreview}</div>
@@ -594,19 +870,27 @@
                 `;
                 
                 container.appendChild(chatElement);
+                updateChatBadge(chat.id);
             });
         }
 
         async function openChat(chatId) {
             try {
+                // Fechar chat anterior se existir
+                if (currentChatId && currentChatId !== chatId) {
+                    // Limpar qualquer estado anterior
+                    const previousChat = document.querySelector(`[data-chat-id="${currentChatId}"]`);
+                    if (previousChat) {
+                        previousChat.classList.remove('active');
+                    }
+                }
+                
                 currentChatId = chatId;
+                markChatAsRead(chatId);
                 
-                // Carregar chat do localStorage
-                const chatData = JSON.parse(localStorage.getItem(`chat_${chatId}`) || '[]');
-                const orderData = JSON.parse(localStorage.getItem('currentOrder') || '{}');
-                
-                // Encontrar o chat na lista
+                const messages = JSON.parse(localStorage.getItem(`chat_${chatId}`) || '[]');
                 const chat = chats.find(c => c.id === chatId);
+                
                 if (!chat) {
                     throw new Error('Chat não encontrado');
                 }
@@ -617,10 +901,7 @@
                 document.getElementById('customerNick').textContent = `Nick Roblox: ${chat.customer.nick}`;
                 document.getElementById('orderTotalAdmin').textContent = `R$ ${chat.total.toFixed(2)}`;
                 document.getElementById('orderItemsCount').textContent = `${chat.items.length} itens`;
-                
-                const statusBadge = document.getElementById('paymentStatusAdmin');
-                statusBadge.textContent = 'Pendente';
-                statusBadge.className = `status-badge status-pending`;
+                updatePaymentStatus(chat.paymentStatus);
                 
                 // Mostrar interface do chat
                 document.getElementById('chatHeader').style.display = 'block';
@@ -628,14 +909,27 @@
                 document.getElementById('noChatMessage').style.display = 'none';
                 
                 // Carregar mensagens
-                renderMessages(chatData);
+                renderMessages(messages);
                 
                 // Atualizar lista de chats para destacar o chat ativo
                 renderChatsList();
                 
+                showNotification(`Chat com ${chat.customer.name} aberto`, 'success', 2000);
+                
             } catch (error) {
                 console.error('❌ Erro ao abrir chat:', error);
-                alert('Erro ao carregar o chat. Tente novamente.');
+                showNotification('Erro ao carregar o chat. Tente novamente.', 'error');
+            }
+        }
+
+        function updatePaymentStatus(status) {
+            const statusBadge = document.getElementById('paymentStatusAdmin');
+            if (status === 'paid') {
+                statusBadge.textContent = 'Pago';
+                statusBadge.className = 'status-badge status-paid';
+            } else {
+                statusBadge.textContent = 'Pendente';
+                statusBadge.className = 'status-badge status-pending';
             }
         }
 
@@ -659,7 +953,6 @@
                 }
             });
 
-            // Auto-ajustar altura do textarea
             messageInput.addEventListener('input', function() {
                 this.style.height = 'auto';
                 this.style.height = Math.min(this.scrollHeight, 120) + 'px';
@@ -668,7 +961,7 @@
 
         async function sendAdminMessage() {
             if (!currentChatId) {
-                alert('Selecione um chat primeiro!');
+                showNotification('Selecione um chat primeiro!', 'warning');
                 return;
             }
 
@@ -677,9 +970,14 @@
 
             if (!text) return;
 
+            // Verificar se é comando /pago
+            if (text.startsWith('/pago')) {
+                confirmPayment();
+                messageInput.value = '';
+                return;
+            }
+
             try {
-                // Adicionar mensagem ao localStorage
-                const messages = JSON.parse(localStorage.getItem(`chat_${currentChatId}`) || '[]');
                 const newMessage = {
                     id: Date.now(),
                     text: text,
@@ -688,31 +986,83 @@
                     type: 'text'
                 };
                 
+                // Salvar no localStorage do chat
+                const messages = JSON.parse(localStorage.getItem(`chat_${currentChatId}`) || '[]');
                 messages.push(newMessage);
                 localStorage.setItem(`chat_${currentChatId}`, JSON.stringify(messages));
+                
+                // Atualizar o pedido com a última mensagem
+                updateOrderLastMessage(currentChatId, newMessage);
                 
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
                 
-                // Adicionar mensagem à UI
+                // Adicionar à UI
                 addMessageToUI(newMessage);
                 
-                // Recarregar a lista de chats para atualizar a última mensagem
+                // Enviar via WebSocket
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'chat_message',
+                        data: newMessage
+                    }));
+                } else {
+                    showNotification('Sem conexão com o servidor', 'warning');
+                }
+                
+                // Recarregar lista
                 loadChats();
                 
             } catch (error) {
                 console.error('❌ Erro ao enviar mensagem:', error);
-                alert('Erro ao enviar mensagem. Tente novamente.');
+                showNotification('Erro ao enviar mensagem. Tente novamente.', 'error');
             }
         }
 
-        async function sendAdminMediaMessage(file) {
+        function confirmPayment() {
+            if (!currentChatId) {
+                showNotification('Selecione um chat primeiro!', 'warning');
+                return;
+            }
+
+            // Atualizar no sistema de múltiplos pedidos
+            const allOrders = JSON.parse(localStorage.getItem('allOrders') || '[]');
+            const orderIndex = allOrders.findIndex(order => order.chatId === currentChatId);
+            if (orderIndex !== -1) {
+                allOrders[orderIndex].paymentStatus = 'paid';
+                localStorage.setItem('allOrders', JSON.stringify(allOrders));
+            }
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'payment_confirmation',
+                    data: {
+                        chatId: currentChatId,
+                        timestamp: new Date().toISOString()
+                    }
+                }));
+                showNotification('Pagamento confirmado com sucesso!', 'success');
+            } else {
+                showNotification('Sem conexão com o servidor', 'warning');
+            }
+        }
+
+        function sendTemplateMessage(text) {
+            if (!currentChatId) {
+                showNotification('Selecione um chat primeiro!', 'warning');
+                return;
+            }
+
+            document.getElementById('messageInputAdmin').value = text;
+            sendAdminMessage();
+        }
+
+        function sendAdminMediaMessage(file) {
             if (!currentChatId || !file) return;
 
             try {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const messages = JSON.parse(localStorage.getItem(`chat_${currentChatId}`) || '[]');
                     const newMessage = {
                         id: Date.now(),
                         mediaUrl: e.target.result,
@@ -723,23 +1073,33 @@
                         text: `Arquivo: ${file.name}`
                     };
                     
+                    // Salvar no localStorage
+                    const messages = JSON.parse(localStorage.getItem(`chat_${currentChatId}`) || '[]');
                     messages.push(newMessage);
                     localStorage.setItem(`chat_${currentChatId}`, JSON.stringify(messages));
                     
-                    // Adicionar mensagem à UI
+                    // Atualizar pedido
+                    updateOrderLastMessage(currentChatId, newMessage);
+                    
                     addMessageToUI(newMessage);
                     
-                    // Limpar input de arquivo
-                    document.getElementById('fileInputAdmin').value = '';
+                    // Enviar via WebSocket
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({
+                            type: 'chat_message',
+                            data: newMessage
+                        }));
+                    }
                     
-                    // Recarregar a lista de chats
+                    document.getElementById('fileInputAdmin').value = '';
                     loadChats();
+                    showNotification('Arquivo enviado com sucesso', 'success');
                 };
                 reader.readAsDataURL(file);
                 
             } catch (error) {
                 console.error('❌ Erro ao enviar mídia:', error);
-                alert('Erro ao enviar arquivo. Tente novamente.');
+                showNotification('Erro ao enviar arquivo. Tente novamente.', 'error');
             }
         }
 
@@ -761,7 +1121,6 @@
                 addMessageToUI(message);
             });
 
-            // Scroll para baixo
             container.scrollTop = container.scrollHeight;
         }
 
@@ -792,8 +1151,6 @@
             }
 
             container.appendChild(messageElement);
-            
-            // Scroll para baixo
             container.scrollTop = container.scrollHeight;
         }
 
@@ -805,8 +1162,37 @@
             });
         }
 
-        // Atualizar automaticamente a lista de chats a cada 30 segundos
-        setInterval(loadChats, 30);
+        function exportAllChats() {
+            const allChatsData = [];
+            const keys = Object.keys(localStorage);
+            
+            keys.forEach(key => {
+                if (key.startsWith('chat_')) {
+                    const chatId = key.replace('chat_', '');
+                    const messages = JSON.parse(localStorage.getItem(key) || '[]');
+                    allChatsData.push({
+                        chatId: chatId,
+                        messages: messages
+                    });
+                }
+            });
+            
+            const dataStr = JSON.stringify(allChatsData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', `chats_export_${new Date().toISOString().split('T')[0]}.json`);
+            linkElement.click();
+            
+            showNotification('Chats exportados com sucesso!', 'success');
+        }
+
+        // Limpar intervalo quando a página for fechada
+        window.addEventListener('beforeunload', () => {
+            if (messagePollingInterval) {
+                clearInterval(messagePollingInterval);
+            }
+        });
     </script>
 </body>
 </html>
